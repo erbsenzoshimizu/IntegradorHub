@@ -27,6 +27,7 @@ import org.xml.sax.SAXException;
 public class ProcessadorXml {
 
     public static void processarXml(String arquivoEntrada, String arquivoSaida) throws TransformerException, ParserConfigurationException, SAXException, IOException, Exception {
+        Principal principal = new Principal();
         String namespace = "http://www.portalfiscal.inf.br/nfe";
 
         // Carrega o XML
@@ -99,9 +100,10 @@ public class ProcessadorXml {
         File outFile = new File(arquivoSaida);
         transformer.transform(new DOMSource(doc), new StreamResult(outFile));
         // Limpa arquivo original
-        Principal.deletarArquivoXml(arquivoEntrada);
+        File file = new File(arquivoEntrada);
+        file.delete();
 
-        System.out.println("Arquivo gravado em: " + arquivoSaida);
+        principal.adicionarLog("Arquivo gravado em: " + arquivoSaida);
     }
 
     /**
@@ -156,7 +158,8 @@ public class ProcessadorXml {
         transformer.transform(new DOMSource(doc), new StreamResult(outFile));
 
         // Exclui o arquivo original
-        Principal.deletarArquivoXml(arquivoEntrada);
+        File file = new File(arquivoEntrada);
+        file.delete();
     }
 
 }

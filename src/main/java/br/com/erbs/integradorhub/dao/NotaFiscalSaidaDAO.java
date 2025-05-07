@@ -1,6 +1,7 @@
 package br.com.erbs.integradorhub.dao;
 
 import br.com.erbs.integradorhub.conexao.OracleConnection;
+import br.com.erbs.integradorhub.principal.Principal;
 import br.com.erbs.integradorhub.utilitarios.DataUtil;
 import java.sql.Connection;
 import java.sql.Date;
@@ -12,6 +13,12 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 
 public class NotaFiscalSaidaDAO {
+
+    private final Principal principal;
+
+    public NotaFiscalSaidaDAO() {
+        principal = new Principal();
+    }
 
     public void autorizarNfce(Map<String, String> nfce) {
         String qry = "UPDATE E140IDE\n"
@@ -27,8 +34,7 @@ public class NotaFiscalSaidaDAO {
         LocalTime hora = offsetDateTime.toLocalTime();
         Integer horaInteiro = DataUtil.converteHoraParaInteiro(hora);
 
-        try (Connection con = OracleConnection.openConnection();
-                PreparedStatement pst = con.prepareStatement(qry)) {
+        try (Connection con = OracleConnection.openConnection(); PreparedStatement pst = con.prepareStatement(qry)) {
             pst.setInt(1, 3);
             pst.setString(2, nfce.get("ProtocoloAutorizacao"));
             pst.setDate(3, Date.valueOf(data));
@@ -37,7 +43,7 @@ public class NotaFiscalSaidaDAO {
 
             pst.executeUpdate();
         } catch (SQLException ex) {
-            System.err.println("Erro ao gravar ocorrência: " + ex.getMessage());
+            principal.adicionarLog("Erro ao gravar ocorrência: " + ex.getMessage());
         }
     }
 
