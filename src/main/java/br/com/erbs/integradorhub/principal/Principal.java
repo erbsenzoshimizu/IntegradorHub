@@ -4,10 +4,6 @@ import br.com.erbs.integradorhub.processador.ProcessadorXml;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.UIManager;
@@ -53,7 +49,7 @@ public final class Principal extends javax.swing.JFrame {
         }
     }
 
-    public void processarArquivos() throws SQLException, Exception {
+    public void processarArquivos() {
         if (worker != null && !worker.isDone()) {
             return;
         }
