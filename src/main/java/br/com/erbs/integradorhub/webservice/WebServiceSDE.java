@@ -1,7 +1,6 @@
 package br.com.erbs.integradorhub.webservice;
 
 import br.com.erbs.integradorhub.dao.NotaFiscalSaidaDAO;
-import br.com.erbs.integradorhub.principal.Principal;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,21 +14,20 @@ import javax.xml.soap.SOAPPart;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
 import javax.xml.ws.BindingProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 public class WebServiceSDE {
     
+    private static final Logger logger = LoggerFactory.getLogger(WebServiceSDE.class);
+    
     private static final String BASE_URL = "http://srv-spnsteste3:8989/SDE/Integracao";
     private static final String NAMESPACE = "http://www.senior.com.br/nfe";
     private static final String USER = "edocs";
     private static final String PASSWORD = "r3m0t0-";
-    private final Principal principal;
-    
-    public WebServiceSDE() {
-        principal = new Principal();
-    }
     
     private Dispatch<SOAPMessage> createDispatch(String endpoint) throws Exception {
         URL url = new URL(BASE_URL + "?wsdl");
@@ -134,19 +132,19 @@ public class WebServiceSDE {
                 NotaFiscalSaidaDAO notaFiscalSaidaDAO = new NotaFiscalSaidaDAO();
                 notaFiscalSaidaDAO.autorizarNfce(resposta);
                 
-                principal.adicionarLog("Documento autorizado com sucesso.", null);
+                logger.info("Documento autorizado com sucesso.");
                 
                 return true;
             } else if ("false".equals(resposta.get("Sucesso"))) {
-                principal.adicionarLog("Erro ao autorizar documento: " + resposta.get("Mensagem"), "erro");
+                logger.error("Erro ao autorizar documento: " + resposta.get("Mensagem"));
                 return false;
             } else {
-                principal.adicionarLog("Resposta sem status definido.", "erro");
+                logger.error("Resposta sem status definido.");
                 return false;
             }
             
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.error("Erro ao acessar o WebService do eDocs: " + e.getMessage());
             return null;
         }
     }

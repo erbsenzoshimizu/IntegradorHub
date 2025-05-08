@@ -4,8 +4,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OracleConnection {
+
+    private static final Logger logger = LoggerFactory.getLogger(OracleConnection.class);
 
     private static final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
 
@@ -33,10 +37,10 @@ public class OracleConnection {
             dbconn = DriverManager.getConnection(ORACLE_URL, dbCredentials);
 
         } catch (ClassNotFoundException e) {
-            System.err.println("Driver JDBC não encontrado: " + e.getMessage());
+            logger.error("Driver JDBC não encontrado: " + e.getMessage());
             return null;
         } catch (SQLException e) {
-            System.err.println("Erro ao conectar ao Banco de Dados: " + e.getMessage());
+            logger.error("Erro ao conectar ao Banco de Dados: " + e.getMessage());
             return null;
         }
 

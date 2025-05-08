@@ -1,6 +1,5 @@
 package br.com.erbs.integradorhub.processador;
 
-import br.com.erbs.integradorhub.principal.Principal;
 import br.com.erbs.integradorhub.webservice.WebServiceSDE;
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +17,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -26,8 +27,9 @@ import org.xml.sax.SAXException;
 
 public class ProcessadorXml {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProcessadorXml.class);
+
     public static void processarXml(String arquivoEntrada, String arquivoSaida) {
-        Principal principal = new Principal();
 
         try {
             String namespace = "http://www.portalfiscal.inf.br/nfe";
@@ -105,18 +107,18 @@ public class ProcessadorXml {
             File file = new File(arquivoEntrada);
             file.delete();
 
-            principal.adicionarLog("Arquivo gravado em: " + arquivoSaida, null);
+            logger.info("Arquivo gravado em: " + arquivoSaida);
 
         } catch (ParserConfigurationException ex) {
-            principal.adicionarLog("Erro na configuração do parser XML: " + ex.getMessage(), "erro");
+            logger.error("Erro na configuração do parser XML: " + ex.getMessage());
         } catch (SAXException ex) {
-            principal.adicionarLog("Erro no formato do XML: " + ex.getMessage(), "erro");
+            logger.error("Erro no formato do XML: " + ex.getMessage());
         } catch (IOException ex) {
-            principal.adicionarLog("Erro ao acessar o arquivo: " + ex.getMessage(), "erro");
+            logger.error("Erro ao acessar o arquivo: " + ex.getMessage());
         } catch (TransformerConfigurationException ex) {
-            principal.adicionarLog("Erro ao configurar o transformador: " + ex.getMessage(), "erro");
+            logger.error("Erro ao configurar o transformador: " + ex.getMessage());
         } catch (TransformerException ex) {
-            principal.adicionarLog("Erro durante a transformação: " + ex.getMessage(), "erro");
+            logger.error("Erro durante a transformação: " + ex.getMessage());
         }
     }
 

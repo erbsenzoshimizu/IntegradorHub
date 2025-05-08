@@ -1,7 +1,9 @@
 br\com\erbs\integradorhub\principal\Principal$1.class
-br\com\erbs\integradorhub\principal\Principal.class
 br\com\erbs\integradorhub\processador\ProcessadorXml.class
 br\com\erbs\integradorhub\conexao\OracleConnection.class
+br\com\erbs\integradorhub\principal\Principal$2.class
+br\com\erbs\integradorhub\utilitarios\DataUtil.class
+br\com\erbs\integradorhub\principal\Principal$3.class
+br\com\erbs\integradorhub\principal\Principal.class
 br\com\erbs\integradorhub\webservice\WebServiceSDE.class
 br\com\erbs\integradorhub\dao\NotaFiscalSaidaDAO.class
-br\com\erbs\integradorhub\utilitarios\DataUtil.class

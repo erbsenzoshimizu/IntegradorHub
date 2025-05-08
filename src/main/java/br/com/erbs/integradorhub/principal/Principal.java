@@ -1,14 +1,15 @@
 package br.com.erbs.integradorhub.principal;
 
-import br.com.erbs.integradorhub.modelos.LogEntry;
 import br.com.erbs.integradorhub.processador.ProcessadorXml;
 import java.awt.Color;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.UIManager;
@@ -19,9 +20,18 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 public final class Principal extends javax.swing.JFrame {
+
+    private static final Logger logger = LoggerFactory.getLogger(Principal.class);
+    private RandomAccessFile logReader;
+    private long logFilePointer = 0;
+    private Timer tailTimer;
+    private static final String LOG_DIR = "c:/temp/logs/";
+    private String logFileNameAtual = "";
 
     // caminhos de diretório
     private static final String BASE_DIR = "\\\\192.168.2.40\\xml\\NFCe\\";
@@ -33,25 +43,34 @@ public final class Principal extends javax.swing.JFrame {
     private static final long EXEC_INTERVAL_MS = 10_000L; // intervalo de execução (milissegundos)    
 
     private Timer execTimer;
-    private SwingWorker<Void, LogEntry> worker;
+    private SwingWorker<Void, Void> worker;
 
     public Principal() {
         initComponents();
 
-        agendarProcessamento();
+        iniciarTailer();
     }
 
     public void agendarProcessamento() {
+        logger.info("Integração iniciada pelo usuário.");
+
         if (execTimer == null) {
             execTimer = new Timer((int) EXEC_INTERVAL_MS, e -> {
                 try {
                     processarArquivos();
                 } catch (Exception ex) {
-                    System.err.println("Erro na execução: " + ex.getMessage());
+                    logger.error("Erro na execução: " + ex.getMessage());
                 }
             });
 
             execTimer.start();
+        }
+    }
+
+    public void pararProcessamento() {
+        if (execTimer != null && execTimer.isRunning()) {
+            execTimer.stop();
+            logger.info("Integração parado pelo usuário.");
         }
     }
 
@@ -60,7 +79,7 @@ public final class Principal extends javax.swing.JFrame {
             return;
         }
 
-        worker = new SwingWorker<Void, LogEntry>() {
+        worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 processarArquivosXml();
@@ -94,16 +113,16 @@ public final class Principal extends javax.swing.JFrame {
         // Processa os arquivos
         for (File xml : arquivosXML) {
             if (!xml.isFile()) {
-                adicionarLog("Arquivo inválido: " + xml.getName(), "erro");
+                logger.error("Arquivo inválido: " + xml.getName());
                 return;
             }
 
-            adicionarLog("Processando: " + xml.getAbsolutePath(), null);
+            logger.info("Processando: " + xml.getAbsolutePath());
 
             try {
                 ProcessadorXml.processarXml(xml.getAbsolutePath(), AUTORIZAR_DIR + xml.getName());
             } catch (Exception e) {
-                adicionarLog("Erro ao processar " + xml.getName() + ": " + e.getMessage(), "erro");
+                logger.error("Erro ao processar " + xml.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -125,16 +144,16 @@ public final class Principal extends javax.swing.JFrame {
         // Processa os arquivos
         for (File xml : arquivosXML) {
             if (!xml.isFile()) {
-                adicionarLog("Arquivo inválido: " + xml.getName(), "erro");
+                logger.error("Arquivo inválido: " + xml.getName());
                 return;
             }
 
-            adicionarLog("Autorizando: " + xml.getAbsolutePath(), null);
+            logger.info("Autorizando: " + xml.getAbsolutePath());
 
             try {
                 ProcessadorXml.autorizarXml(xml.getAbsolutePath(), AUTORIZADO_DIR + xml.getName(), REJEITADO_DIR + xml.getName());
             } catch (IOException | ParserConfigurationException | TransformerException | SAXException e) {
-                adicionarLog("Erro ao processar " + xml.getName() + ": " + e.getMessage(), "erro");
+                logger.error("Erro ao processar " + xml.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -142,31 +161,25 @@ public final class Principal extends javax.swing.JFrame {
     private boolean verificarOuCriarDiretorio(File diretorio) {
         if (!diretorio.exists()) {
             if (diretorio.mkdirs()) {
-                adicionarLog("Diretório criado com sucesso.", null);
+                logger.info("Diretório criado com sucesso.");
             } else {
-                adicionarLog("Falha ao criar o diretório.", "erro");
+                logger.error("Falha ao criar o diretório.");
                 return false;
             }
         } else if (!diretorio.isDirectory()) {
-            adicionarLog("O caminho existe, mas não é um diretório.", "erro");
+            logger.error("O caminho existe, mas não é um diretório.");
             return false;
         }
         return true;
     }
 
     public void adicionarLog(String mensagem, String nivel) {
-
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
-        mensagem = "[" + timestamp + "] " + mensagem + "\n";
-
-        System.out.println(mensagem);
-
         StyledDocument doc = jTextPaneLogs.getStyledDocument();
 
-        Style estiloPadrao = jTextPaneLogs.addStyle("padrao", null);
+        Style estiloPadrao = jTextPaneLogs.addStyle("info", null);
         StyleConstants.setForeground(estiloPadrao, Color.black);
 
-        Style estiloErro = jTextPaneLogs.addStyle("erro", null);
+        Style estiloErro = jTextPaneLogs.addStyle("error", null);
         StyleConstants.setForeground(estiloErro, Color.red);
 
         Style estilo = estiloPadrao;
@@ -184,6 +197,57 @@ public final class Principal extends javax.swing.JFrame {
         jTextPaneLogs.setCaretPosition(jTextPaneLogs.getDocument().getLength());
     }
 
+    private String getLogFileName() {
+        String hoje = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return LOG_DIR + "integradorhub-" + hoje + ".log";
+    }
+
+    private void iniciarTailer() {
+        tailTimer = new Timer(1000, e -> {
+            try {
+                String novoLogFileName = getLogFileName(); // ex: integradorhub-2025-05-08.log
+
+                // Se o nome mudou (nova data), reabra o arquivo
+                if (!novoLogFileName.equals(logFileNameAtual)) {
+                    if (logReader != null) {
+                        logReader.close();
+                    }
+                    File logFile = new File(novoLogFileName);
+                    if (!logFile.exists()) {
+                        logFile.getParentFile().mkdirs();
+                        logFile.createNewFile();
+                    }
+                    logReader = new RandomAccessFile(logFile, "r");
+                    logFilePointer = logFile.length(); // começa do fim
+                    logFileNameAtual = novoLogFileName;
+                }
+
+                long fileLength = logReader.length();
+                if (fileLength > logFilePointer) {
+                    logReader.seek(logFilePointer);
+                    String line;
+                    while ((line = logReader.readLine()) != null) {
+                        String decoded = new String(line.getBytes("ISO-8859-1"), "UTF-8");
+
+                        // Extrai o nível de log usando regex
+                        String nivel = "info"; // valor padrão
+                        Matcher matcher = Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3} ([A-Z]{4,5})").matcher(decoded);
+                        if (matcher.find()) {
+                            nivel = matcher.group(1).toLowerCase(); // ex: "error", "info", etc.
+                        }
+
+                        adicionarLog(decoded + "\n", nivel);
+
+                    }
+                    logFilePointer = logReader.getFilePointer();
+                }
+            } catch (IOException ex) {
+                logger.error("Erro ao ler log: " + ex.getMessage());
+            }
+        });
+        tailTimer.start();
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -195,9 +259,9 @@ public final class Principal extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPaneLogs = new javax.swing.JTextPane();
-        txtLog = new javax.swing.JTextPane();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        jButtonIniciar = new javax.swing.JButton();
+        jButton2Parar = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Integrador Hub ");
@@ -208,42 +272,73 @@ public final class Principal extends javax.swing.JFrame {
         jTextPaneLogs.setEditable(false);
         jScrollPane1.setViewportView(jTextPaneLogs);
 
-        txtLog.setEditable(false);
+        jButtonIniciar.setText("Iniciar");
+        jButtonIniciar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonIniciarActionPerformed(evt);
+            }
+        });
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane2.setViewportView(jTextArea1);
+        jButton2Parar.setText("Parar");
+        jButton2Parar.setEnabled(false);
+        jButton2Parar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2PararActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/customer_service_robot_lg_wm.gif"))); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(109, 109, 109)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 835, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(57, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(txtLog, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButtonIniciar)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2Parar)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 665, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtLog, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(32, 32, 32)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 243, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(58, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(32, 32, 32)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonIniciar)
+                    .addComponent(jButton2Parar))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(22, 22, 22))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButtonIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonIniciarActionPerformed
+        // TODO add your handling code here:
+        agendarProcessamento();
+        jButtonIniciar.setEnabled(false);
+        jButton2Parar.setEnabled(true);
+    }//GEN-LAST:event_jButtonIniciarActionPerformed
+
+    private void jButton2PararActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2PararActionPerformed
+        // TODO add your handling code here:
+        pararProcessamento();
+        jButtonIniciar.setEnabled(true);
+        jButton2Parar.setEnabled(false);
+    }//GEN-LAST:event_jButton2PararActionPerformed
 
     /**
      * @param args the command line arguments
@@ -267,10 +362,10 @@ public final class Principal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton2Parar;
+    private javax.swing.JButton jButtonIniciar;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextPane jTextPaneLogs;
-    private static javax.swing.JTextPane txtLog;
     // End of variables declaration//GEN-END:variables
 }

@@ -1,0 +1,38 @@
+<configuration scan="true" scanPeriod="30 seconds">
+  
+    <!-- 1. Definição de encoders compartilhados -->
+    <property name="PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level - %msg%n"/>
+
+
+    <!-- 2. Appender de console (útil em desenvolvimento) -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 3. Appender de arquivo com rollover diário -->
+    <appender name="DAILY_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>c:/temp/logs/integradorhub-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <!-- compressão opcional:
+            <fileNamePattern>logs/app-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            -->
+        </rollingPolicy>
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 5. Configuração do logger raiz -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DAILY_FILE"/>
+    </root>
+
+</configuration>
