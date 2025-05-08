@@ -105,17 +105,18 @@ public class ProcessadorXml {
             File file = new File(arquivoEntrada);
             file.delete();
 
-            principal.adicionarLog("Arquivo gravado em: " + arquivoSaida);
+            principal.adicionarLog("Arquivo gravado em: " + arquivoSaida, null);
+
         } catch (ParserConfigurationException ex) {
-            principal.adicionarLog("Erro na configuração do parser XML: " + ex.getMessage());
+            principal.adicionarLog("Erro na configuração do parser XML: " + ex.getMessage(), "erro");
         } catch (SAXException ex) {
-            principal.adicionarLog("Erro no formato do XML: " + ex.getMessage());
+            principal.adicionarLog("Erro no formato do XML: " + ex.getMessage(), "erro");
         } catch (IOException ex) {
-            principal.adicionarLog("Erro ao acessar o arquivo: " + ex.getMessage());
+            principal.adicionarLog("Erro ao acessar o arquivo: " + ex.getMessage(), "erro");
         } catch (TransformerConfigurationException ex) {
-            principal.adicionarLog("Erro ao configurar o transformador: " + ex.getMessage());
+            principal.adicionarLog("Erro ao configurar o transformador: " + ex.getMessage(), "erro");
         } catch (TransformerException ex) {
-            principal.adicionarLog("Erro durante a transformação: " + ex.getMessage());
+            principal.adicionarLog("Erro durante a transformação: " + ex.getMessage(), "erro");
         }
     }
 

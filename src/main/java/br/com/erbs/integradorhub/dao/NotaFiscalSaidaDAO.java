@@ -43,7 +43,7 @@ public class NotaFiscalSaidaDAO {
 
             pst.executeUpdate();
         } catch (SQLException ex) {
-            principal.adicionarLog("Erro ao gravar ocorrência: " + ex.getMessage());
+            principal.adicionarLog("Erro ao gravar ocorrência: " + ex.getMessage(), "erro");
         }
     }
 

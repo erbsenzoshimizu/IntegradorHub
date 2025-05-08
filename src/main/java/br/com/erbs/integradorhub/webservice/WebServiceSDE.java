@@ -134,14 +134,14 @@ public class WebServiceSDE {
                 NotaFiscalSaidaDAO notaFiscalSaidaDAO = new NotaFiscalSaidaDAO();
                 notaFiscalSaidaDAO.autorizarNfce(resposta);
                 
-                principal.adicionarLog("Documento autorizado com sucesso.");
+                principal.adicionarLog("Documento autorizado com sucesso.", null);
                 
                 return true;
             } else if ("false".equals(resposta.get("Sucesso"))) {
-                principal.adicionarLog("Erro ao autorizar documento: " + resposta.get("Mensagem"));
+                principal.adicionarLog("Erro ao autorizar documento: " + resposta.get("Mensagem"), "erro");
                 return false;
             } else {
-                principal.adicionarLog("Resposta sem status definido.");
+                principal.adicionarLog("Resposta sem status definido.", "erro");
                 return false;
             }
             
