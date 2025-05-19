@@ -13,15 +13,16 @@ public class OracleConnection {
 
     private static final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
 
+    /*
     private static final String ORACLE_URL = "jdbc:oracle:thin:@192.168.2.4:1521/dbsenior";
     private static final String USER = "sapiensteste3";
     private static final String PASSWORD = "sbresapiensteste3";
-
-    /*
+     */
+    
     private static final String ORACLE_URL = "jdbc:oracle:thin:@192.168.2.3:1521/dbsenior";
     private static final String USER = "sapiens";
     private static final String PASSWORD = "sbresapiens";
-     */
+
     public static Connection openConnection() {
         Connection dbconn = null;
 

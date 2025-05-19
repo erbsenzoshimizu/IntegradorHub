@@ -30,11 +30,11 @@ public final class Principal extends javax.swing.JFrame {
     private RandomAccessFile logReader;
     private long logFilePointer = 0;
     private Timer tailTimer;
-    private static final String LOG_DIR = "c:/temp/logs/";
+    private static final String LOG_DIR = "c:/IntegradorHub/logs/";
     private String logFileNameAtual = "";
 
     // caminhos de diretório
-    private static final String BASE_DIR = "\\\\192.168.2.40\\xml\\NFCe\\";
+    private static final String BASE_DIR = "\\\\192.168.2.193\\XMLs\\NFCe\\";
     private static final String PROCESSAR_DIR = BASE_DIR + "Processar\\";
     private static final String AUTORIZAR_DIR = BASE_DIR + "Autorizar\\";
     private static final String AUTORIZADO_DIR = BASE_DIR + "Autorizado\\";

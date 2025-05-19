@@ -24,7 +24,8 @@ public class WebServiceSDE {
     
     private static final Logger logger = LoggerFactory.getLogger(WebServiceSDE.class);
     
-    private static final String BASE_URL = "http://srv-spnsteste3:8989/SDE/Integracao";
+    /*private static final String BASE_URL = "http://srv-spnsteste3:8989/SDE/Integracao";*/
+    private static final String BASE_URL = "http://192.168.2.193:8989/SDE/Integracao";
     private static final String NAMESPACE = "http://www.senior.com.br/nfe";
     private static final String USER = "edocs";
     private static final String PASSWORD = "r3m0t0-";
