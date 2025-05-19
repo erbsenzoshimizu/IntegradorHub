@@ -1,6 +1,7 @@
 package br.com.erbs.integradorhub.principal;
 
 import br.com.erbs.integradorhub.processador.ProcessadorXml;
+import br.com.erbs.integradorhub.utilitarios.FileUtil;
 import java.awt.Color;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -99,7 +100,7 @@ public final class Principal extends javax.swing.JFrame {
     public void processarArquivosXml() {
         File diretorio = new File(PROCESSAR_DIR);
 
-        if (!verificarOuCriarDiretorio(diretorio)) {
+        if (!FileUtil.verificarOuCriarDiretorio(diretorio)) {
             return;
         }
 
@@ -130,7 +131,7 @@ public final class Principal extends javax.swing.JFrame {
     public void autorizarArquivosXml() {
         File diretorio = new File(AUTORIZAR_DIR);
 
-        if (!verificarOuCriarDiretorio(diretorio)) {
+        if (!FileUtil.verificarOuCriarDiretorio(diretorio)) {
             return;
         }
 
@@ -156,21 +157,6 @@ public final class Principal extends javax.swing.JFrame {
                 logger.error("Erro ao processar " + xml.getName() + ": " + e.getMessage());
             }
         }
-    }
-
-    private boolean verificarOuCriarDiretorio(File diretorio) {
-        if (!diretorio.exists()) {
-            if (diretorio.mkdirs()) {
-                logger.info("Diretório criado com sucesso.");
-            } else {
-                logger.error("Falha ao criar o diretório.");
-                return false;
-            }
-        } else if (!diretorio.isDirectory()) {
-            logger.error("O caminho existe, mas não é um diretório.");
-            return false;
-        }
-        return true;
     }
 
     public void adicionarLog(String mensagem, String nivel) {
@@ -220,6 +206,8 @@ public final class Principal extends javax.swing.JFrame {
                     logReader = new RandomAccessFile(logFile, "r");
                     logFilePointer = logFile.length(); // começa do fim
                     logFileNameAtual = novoLogFileName;
+                    
+                    jTextPaneLogs.setText(""); //Limpa a tela na virada do dia para não fica muito longo
                 }
 
                 long fileLength = logReader.length();

@@ -17,7 +17,7 @@
     <appender name="DAILY_FILE"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>c:/temp/logs/integradorhub-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>c:/IntegradorHub/logs/integradorhub-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
             <!-- compressão opcional:
             <fileNamePattern>logs/app-%d{yyyy-MM-dd}.log.gz</fileNamePattern>

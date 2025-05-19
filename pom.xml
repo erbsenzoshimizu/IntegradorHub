@@ -47,7 +47,7 @@
 
     <build>
         <plugins>
-            <!-- Shade Plugin para criar fat-jar -->
+            <!-- Shade Plugin para criar fat-jar sobrescrevendo o jar padrão -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -59,8 +59,20 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <!-- Remove META-INF duplicados e ajusta o MANIFEST.MF -->
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <!-- Anexa o resultado ao artefato principal (sem "-shaded") -->
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <!-- Remove duplicatas de META-INF desnecessárias -->
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <!-- Ajusta o MANIFEST.MF para apontar ao seu Main -->
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>br.com.erbs.integradorhub.principal.Principal</mainClass>
@@ -71,7 +83,7 @@
                 </executions>
             </plugin>
 
-            <!-- (Opcional) Jar Plugin, caso queira preview sem shade -->
+            <!-- Opcional: mantém Jar Plugin para build “magro” sem Shade -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -79,7 +91,6 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <!-- Só adiciona classpath caso NÃO use shade -->
                             <mainClass>br.com.erbs.integradorhub.principal.Principal</mainClass>
                         </manifest>
                     </archive>

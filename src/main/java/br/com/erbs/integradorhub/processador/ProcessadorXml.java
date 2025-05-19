@@ -1,5 +1,6 @@
 package br.com.erbs.integradorhub.processador;
 
+import br.com.erbs.integradorhub.utilitarios.FileUtil;
 import br.com.erbs.integradorhub.webservice.WebServiceSDE;
 import java.io.File;
 import java.io.IOException;
@@ -101,7 +102,13 @@ public class ProcessadorXml {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "no");
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+
             File outFile = new File(arquivoSaida);
+
+            if (!FileUtil.verificarOuCriarDiretorio(outFile.getParentFile())) {
+                return;
+            }
+
             transformer.transform(new DOMSource(doc), new StreamResult(outFile));
             // Limpa arquivo original
             File file = new File(arquivoEntrada);
@@ -171,6 +178,11 @@ public class ProcessadorXml {
         // Define o destino com base no resultado
         String destino = webServiceSDE.autorizarDocumento(xml, cnpjFilial) ? arquivoSucesso : arquivoFalha;
         File outFile = new File(destino);
+
+        if (!FileUtil.verificarOuCriarDiretorio(outFile.getParentFile())) {
+            return;
+        }
+
         transformer.transform(new DOMSource(doc), new StreamResult(outFile));
 
         // Exclui o arquivo original
