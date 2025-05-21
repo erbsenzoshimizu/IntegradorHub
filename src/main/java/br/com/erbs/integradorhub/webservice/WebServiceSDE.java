@@ -1,6 +1,7 @@
 package br.com.erbs.integradorhub.webservice;
 
 import br.com.erbs.integradorhub.dao.NotaFiscalSaidaDAO;
+import br.com.erbs.integradorhub.util.ConfigLoader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,15 +22,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 public class WebServiceSDE {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(WebServiceSDE.class);
-    
-    /*private static final String BASE_URL = "http://srv-spnsteste3:8989/SDE/Integracao";*/
-    private static final String BASE_URL = "http://192.168.2.193:8989/SDE/Integracao";
+
+    private static final String BASE_URL = ConfigLoader.get("urlSdeWS");
     private static final String NAMESPACE = "http://www.senior.com.br/nfe";
     private static final String USER = "edocs";
     private static final String PASSWORD = "r3m0t0-";
-    
+
     private Dispatch<SOAPMessage> createDispatch(String endpoint) throws Exception {
         URL url = new URL(BASE_URL + "?wsdl");
         QName serviceName = new QName(NAMESPACE, "IntegracaoDocumentoServico");
@@ -42,7 +42,7 @@ public class WebServiceSDE {
         bp.getRequestContext().put(BindingProvider.SOAPACTION_USE_PROPERTY, true);
         return dispatch;
     }
-    
+
     private SOAPMessage createSoapMessage(String operation, String[][] parameters) throws Exception {
         // 1) Cria a mensagem e ajusta prefixes
         MessageFactory factory = MessageFactory.newInstance();
@@ -62,7 +62,7 @@ public class WebServiceSDE {
         for (String[] param : parameters) {
             String name = param[0], value = param[1];
             SOAPElement el = root.addChildElement(name, "nfe", NAMESPACE);
-            
+
             if ("xml".equals(name)) {
                 // value aqui deve ser só o xml puro, sem <![CDATA[…]]>
                 CDATASection cdata = doc.createCDATASection(value);
@@ -75,11 +75,11 @@ public class WebServiceSDE {
         // 4) Ajusta o SOAPAction
         String soapAction = NAMESPACE + "/IIntegracaoDocumento/" + operation;
         soapMessage.getMimeHeaders().addHeader("SOAPAction", soapAction);
-        
+
         soapMessage.saveChanges();
         return soapMessage;
     }
-    
+
     public Boolean autorizarDocumento(String xml, String cnpjFilial) {
         try {
             Dispatch<SOAPMessage> dispatch = createDispatch("AutorizarDocumento");
@@ -87,7 +87,7 @@ public class WebServiceSDE {
             // Define o SOAPAction explicitamente no BindingProvider
             BindingProvider bp = (BindingProvider) dispatch;
             bp.getRequestContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, NAMESPACE + "/IIntegracaoDocumento/AutorizarDocumento");
-            
+
             String[][] params = {
                 {"usuario", USER},
                 {"senha", PASSWORD},
@@ -95,46 +95,46 @@ public class WebServiceSDE {
                 {"xml", xml},
                 {"identificacaoGerador", "ERP Senior"}
             };
-            
+
             SOAPMessage request = createSoapMessage("AutorizarDocumento", params);
             SOAPMessage response = dispatch.invoke(request);
-            
+
             Map<String, String> resposta = new HashMap<>();
             SOAPBody responseBody = response.getSOAPBody();
-            
+
             NodeList nodes;
-            
+
             nodes = responseBody.getElementsByTagNameNS("*", "Sucesso");
             if (nodes.getLength() > 0) {
                 resposta.put("Sucesso", nodes.item(0).getTextContent());
             }
-            
+
             nodes = responseBody.getElementsByTagNameNS("*", "Mensagem");
             if (nodes.getLength() > 0) {
                 resposta.put("Mensagem", nodes.item(0).getTextContent());
             }
-            
+
             nodes = responseBody.getElementsByTagNameNS("*", "ProtocoloAutorizacao");
             if (nodes.getLength() > 0) {
                 resposta.put("ProtocoloAutorizacao", nodes.item(0).getTextContent());
             }
-            
+
             nodes = responseBody.getElementsByTagNameNS("*", "DataAutorizacao");
             if (nodes.getLength() > 0) {
                 resposta.put("DataAutorizacao", nodes.item(0).getTextContent());
             }
-            
+
             nodes = responseBody.getElementsByTagNameNS("*", "ChaveDocumento");
             if (nodes.getLength() > 0) {
                 resposta.put("ChaveDocumento", nodes.item(0).getTextContent());
             }
-            
+
             if ("true".equals(resposta.get("Sucesso"))) {
                 NotaFiscalSaidaDAO notaFiscalSaidaDAO = new NotaFiscalSaidaDAO();
                 notaFiscalSaidaDAO.autorizarNfce(resposta);
-                
+
                 logger.info("Documento autorizado com sucesso.");
-                
+
                 return true;
             } else if ("false".equals(resposta.get("Sucesso"))) {
                 logger.error("Erro ao autorizar documento: " + resposta.get("Mensagem"));
@@ -143,7 +143,7 @@ public class WebServiceSDE {
                 logger.error("Resposta sem status definido.");
                 return false;
             }
-            
+
         } catch (Exception e) {
             logger.error("Erro ao acessar o WebService do eDocs: " + e.getMessage());
             return null;

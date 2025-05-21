@@ -1,5 +1,6 @@
 package br.com.erbs.integradorhub.conexao;
 
+import br.com.erbs.integradorhub.util.ConfigLoader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -13,29 +14,21 @@ public class OracleConnection {
 
     private static final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
 
-    /*
-    private static final String ORACLE_URL = "jdbc:oracle:thin:@192.168.2.4:1521/dbsenior";
-    private static final String USER = "sapiensteste3";
-    private static final String PASSWORD = "sbresapiensteste3";
-     */
-    
-    private static final String ORACLE_URL = "jdbc:oracle:thin:@192.168.2.3:1521/dbsenior";
-    private static final String USER = "sapiens";
-    private static final String PASSWORD = "sbresapiens";
-
     public static Connection openConnection() {
-        Connection dbconn = null;
+        Connection dbconn;
 
         try {
-            if (dbconn == null) {
-                Class.forName(ORACLE_DRIVER);
-            }
+            Class.forName(ORACLE_DRIVER);
+
+            String url = ConfigLoader.get("urlDB");
+            String user = ConfigLoader.get("userDB");
+            String password = ConfigLoader.get("passwordDB");
 
             Properties dbCredentials = new Properties();
-            dbCredentials.put("user", USER);
-            dbCredentials.put("password", PASSWORD);
+            dbCredentials.put("user", user);
+            dbCredentials.put("password", password);
 
-            dbconn = DriverManager.getConnection(ORACLE_URL, dbCredentials);
+            dbconn = DriverManager.getConnection(url, dbCredentials);
 
         } catch (ClassNotFoundException e) {
             logger.error("Driver JDBC não encontrado: " + e.getMessage());

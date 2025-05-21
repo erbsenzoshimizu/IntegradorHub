@@ -1,6 +1,7 @@
 package br.com.erbs.integradorhub.principal;
 
 import br.com.erbs.integradorhub.processador.ProcessadorXml;
+import br.com.erbs.integradorhub.util.ConfigLoader;
 import br.com.erbs.integradorhub.utilitarios.FileUtil;
 import java.awt.Color;
 import java.io.File;
@@ -31,15 +32,15 @@ public final class Principal extends javax.swing.JFrame {
     private RandomAccessFile logReader;
     private long logFilePointer = 0;
     private Timer tailTimer;
-    private static final String LOG_DIR = "c:/IntegradorHub/logs/";
+    private static final String LOG_DIR = System.getProperty("user.dir") + "/logs/";
     private String logFileNameAtual = "";
 
     // caminhos de diretório
-    private static final String BASE_DIR = "\\\\192.168.2.193\\XMLs\\NFCe\\";
-    private static final String PROCESSAR_DIR = BASE_DIR + "Processar\\";
-    private static final String AUTORIZAR_DIR = BASE_DIR + "Autorizar\\";
-    private static final String AUTORIZADO_DIR = BASE_DIR + "Autorizado\\";
-    private static final String REJEITADO_DIR = BASE_DIR + "Rejeitado\\";
+    private String xmlDir;
+    private String processarDir;
+    private String autorizarDir;
+    private String autorizadoDir;
+    private String rejeitadoDir;
 
     private static final long EXEC_INTERVAL_MS = 10_000L; // intervalo de execução (milissegundos)    
 
@@ -50,6 +51,20 @@ public final class Principal extends javax.swing.JFrame {
         initComponents();
 
         iniciarTailer();
+
+        carregaParametros();
+
+    }
+
+    private void carregaParametros() {
+        
+        ConfigLoader.carregar();
+
+        xmlDir = ConfigLoader.get("xmlDir");
+        processarDir = xmlDir + "Processar\\";
+        autorizarDir = xmlDir + "Autorizar\\";
+        autorizadoDir = xmlDir + "Autorizado\\";
+        rejeitadoDir = xmlDir + "Rejeitado\\";
     }
 
     public void agendarProcessamento() {
@@ -98,7 +113,7 @@ public final class Principal extends javax.swing.JFrame {
     }
 
     public void processarArquivosXml() {
-        File diretorio = new File(PROCESSAR_DIR);
+        File diretorio = new File(processarDir);
 
         if (!FileUtil.verificarOuCriarDiretorio(diretorio)) {
             return;
@@ -121,7 +136,7 @@ public final class Principal extends javax.swing.JFrame {
             logger.info("Processando: " + xml.getAbsolutePath());
 
             try {
-                ProcessadorXml.processarXml(xml.getAbsolutePath(), AUTORIZAR_DIR + xml.getName());
+                ProcessadorXml.processarXml(xml.getAbsolutePath(), autorizarDir + xml.getName());
             } catch (Exception e) {
                 logger.error("Erro ao processar " + xml.getName() + ": " + e.getMessage());
             }
@@ -129,7 +144,7 @@ public final class Principal extends javax.swing.JFrame {
     }
 
     public void autorizarArquivosXml() {
-        File diretorio = new File(AUTORIZAR_DIR);
+        File diretorio = new File(autorizarDir);
 
         if (!FileUtil.verificarOuCriarDiretorio(diretorio)) {
             return;
@@ -152,7 +167,7 @@ public final class Principal extends javax.swing.JFrame {
             logger.info("Autorizando: " + xml.getAbsolutePath());
 
             try {
-                ProcessadorXml.autorizarXml(xml.getAbsolutePath(), AUTORIZADO_DIR + xml.getName(), REJEITADO_DIR + xml.getName());
+                ProcessadorXml.autorizarXml(xml.getAbsolutePath(), autorizadoDir + xml.getName(), rejeitadoDir + xml.getName());
             } catch (IOException | ParserConfigurationException | TransformerException | SAXException e) {
                 logger.error("Erro ao processar " + xml.getName() + ": " + e.getMessage());
             }
@@ -206,7 +221,7 @@ public final class Principal extends javax.swing.JFrame {
                     logReader = new RandomAccessFile(logFile, "r");
                     logFilePointer = logFile.length(); // começa do fim
                     logFileNameAtual = novoLogFileName;
-                    
+
                     jTextPaneLogs.setText(""); //Limpa a tela na virada do dia para não fica muito longo
                 }
 
