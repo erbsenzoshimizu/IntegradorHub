@@ -2,7 +2,9 @@ package br.com.erbs.integradorhub.webservice;
 
 import br.com.erbs.integradorhub.dao.NotaFiscalSaidaDAO;
 import br.com.erbs.integradorhub.util.ConfigLoader;
+import java.io.ByteArrayOutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.namespace.QName;
@@ -97,6 +99,11 @@ public class WebServiceSDE {
             };
 
             SOAPMessage request = createSoapMessage("AutorizarDocumento", params);
+
+            ByteArrayOutputStream otp = new ByteArrayOutputStream();
+            request.writeTo(otp);
+            System.out.println(new String(otp.toByteArray(), StandardCharsets.UTF_8));
+
             SOAPMessage response = dispatch.invoke(request);
 
             Map<String, String> resposta = new HashMap<>();
