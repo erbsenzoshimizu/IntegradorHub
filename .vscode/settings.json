@@ -1,0 +1,12 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.jdt.ls.java.home": "C:\\App\\Java64\\jdk1.8.0_251",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-1.8",
+            "path": "C:\\App\\Java64\\jdk1.8.0_251",
+            "default": true
+        }
+    ],
+    "java.settings.showBuildStatus": "never"
+}
