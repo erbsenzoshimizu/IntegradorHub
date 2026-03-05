@@ -1,7 +1,10 @@
 package br.com.erbs.integradorhub.webservice;
 
 import br.com.erbs.integradorhub.dao.NotaFiscalSaidaDAO;
+import br.com.erbs.integradorhub.util.ConfigLoader;
+import java.io.ByteArrayOutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.namespace.QName;
@@ -14,13 +17,17 @@ import javax.xml.soap.SOAPPart;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
 import javax.xml.ws.BindingProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 public class WebServiceSDE {
 
-    private static final String BASE_URL = "http://srv-spnsteste3:8989/SDE/Integracao";
+    private static final Logger logger = LoggerFactory.getLogger(WebServiceSDE.class);
+
+    private static final String BASE_URL = ConfigLoader.get("urlSdeWS");
     private static final String NAMESPACE = "http://www.senior.com.br/nfe";
     private static final String USER = "edocs";
     private static final String PASSWORD = "r3m0t0-";
@@ -92,6 +99,11 @@ public class WebServiceSDE {
             };
 
             SOAPMessage request = createSoapMessage("AutorizarDocumento", params);
+
+            ByteArrayOutputStream otp = new ByteArrayOutputStream();
+            request.writeTo(otp);
+            System.out.println(new String(otp.toByteArray(), StandardCharsets.UTF_8));
+
             SOAPMessage response = dispatch.invoke(request);
 
             Map<String, String> resposta = new HashMap<>();
@@ -128,19 +140,19 @@ public class WebServiceSDE {
                 NotaFiscalSaidaDAO notaFiscalSaidaDAO = new NotaFiscalSaidaDAO();
                 notaFiscalSaidaDAO.autorizarNfce(resposta);
 
-                System.out.println("Documento autorizado com sucesso.");
+                logger.info("Documento autorizado com sucesso.");
 
                 return true;
             } else if ("false".equals(resposta.get("Sucesso"))) {
-                System.out.println("Erro ao autorizar documento: " + resposta.get("Mensagem"));
+                logger.error("Erro ao autorizar documento: " + resposta.get("Mensagem"));
                 return false;
             } else {
-                System.out.println("Resposta sem status definido.");
+                logger.error("Resposta sem status definido.");
                 return false;
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.error("Erro ao acessar o WebService do eDocs: " + e.getMessage());
             return null;
         }
     }
