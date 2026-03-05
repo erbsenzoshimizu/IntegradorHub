@@ -12,8 +12,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <repositories>
@@ -24,14 +24,14 @@
     </repositories>
 
     <dependencies>
-        <!-- JAX-WS API for SOAP -->
+        <!-- JAX-WS API for SOAP (compatível com Java 17) -->
         <dependency>
             <groupId>javax.xml.ws</groupId>
             <artifactId>jaxws-api</artifactId>
             <version>2.3.1</version>
         </dependency>
         
-        <!-- SOAP Implementation -->
+        <!-- SOAP Implementation (versão compatível com Java 17) -->
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
@@ -45,38 +45,38 @@
             <version>1.5.2</version>
         </dependency>
         
-        <!-- Woodstox XML processor -->
+        <!-- Woodstox XML processor (compatível com Java 17) -->
         <dependency>
             <groupId>com.fasterxml.woodstox</groupId>
             <artifactId>woodstox-core</artifactId>
-            <version>5.1.0</version>
+            <version>6.5.1</version>
         </dependency>
         
         <!-- StAX2 API -->
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>stax2-api</artifactId>
-            <version>4.1</version>
+            <version>4.2.1</version>
         </dependency>
         
-        <!-- JDBC Oracle -->
+        <!-- JDBC Oracle (versão mais recente) -->
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>19.8.0.0</version>
+            <version>21.9.0.0</version>
         </dependency>
 
-        <!-- SLF4J API -->
+        <!-- SLF4J API (versão atualizada) -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
+            <version>2.0.9</version>
         </dependency>
         <!-- Binding para SLF4J -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.11</version>
+            <version>1.4.11</version>
         </dependency>
     </dependencies>
 
@@ -110,7 +110,7 @@
                             <!-- Ajusta o MANIFEST.MF para apontar ao seu Main -->
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>br.com.erbs.integradorhub.principal.Principal</mainClass>
+                                    <mainClass>br.com.erbs.integradorhub.IntegradorApplication</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -126,7 +126,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>br.com.erbs.integradorhub.principal.Principal</mainClass>
+                            <mainClass>br.com.erbs.integradorhub.IntegradorApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

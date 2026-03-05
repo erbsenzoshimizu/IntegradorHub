@@ -8,5 +8,11 @@
             "default": true
         }
     ],
-    "java.settings.showBuildStatus": "never"
+    "java.settings.showBuildStatus": "never",
+    "files.exclude": {
+        "java/**": true
+    },
+    "search.exclude": {
+        "java/**": true
+    }
 }

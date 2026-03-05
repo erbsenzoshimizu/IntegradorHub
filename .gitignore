@@ -57,3 +57,6 @@ build/
 .idea/
 *.iml
 # .vscode/
+
+# JDK embarcado na aplicação
+java/

@@ -29,7 +29,7 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>br.com.erbs.integradorhub.principal.Principal</mainClass>
+                  <mainClass>br.com.erbs.integradorhub.IntegradorApplication</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -42,7 +42,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>br.com.erbs.integradorhub.principal.Principal</mainClass>
+              <mainClass>br.com.erbs.integradorhub.IntegradorApplication</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -56,8 +56,8 @@
     </repository>
   </repositories>
   <properties>
-    <maven.compiler.target>8</maven.compiler.target>
-    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>
