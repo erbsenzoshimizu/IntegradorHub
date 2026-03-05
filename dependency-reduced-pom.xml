@@ -51,13 +51,13 @@
   </build>
   <repositories>
     <repository>
-      <id>oracle-repository</id>
-      <url>https://maven.oracle.com</url>
+      <id>central</id>
+      <url>https://repo1.maven.org/maven2</url>
     </repository>
   </repositories>
   <properties>
+    <maven.compiler.target>8</maven.compiler.target>
     <maven.compiler.source>8</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.target>8</maven.compiler.target>
   </properties>
 </project>

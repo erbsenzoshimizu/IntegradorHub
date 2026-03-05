@@ -93,59 +93,6 @@ public class Cancelamento {
         return chaveNFe.substring(0, 2);
     }
 
-    private static void adicionarSignatureFake(Document doc, Element evento, String idEvento) {
-        final String ds = "http://www.w3.org/2000/09/xmldsig#";
-        Element sig = doc.createElementNS(ds, "ds:Signature");
-        sig.setAttribute("xmlns:ds", ds);
-        evento.appendChild(sig);
-
-        Element si = doc.createElementNS(ds, "ds:SignedInfo");
-        sig.appendChild(si);
-
-        Element cm = doc.createElementNS(ds, "ds:CanonicalizationMethod");
-        cm.setAttribute("Algorithm", "http://www.w3.org/TR/2001/REC-xml-c14n-20010315");
-        si.appendChild(cm);
-
-        Element sm = doc.createElementNS(ds, "ds:SignatureMethod");
-        sm.setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1");
-        si.appendChild(sm);
-
-        Element ref = doc.createElementNS(ds, "ds:Reference");
-        ref.setAttribute("URI", "#" + idEvento);
-        si.appendChild(ref);
-
-        Element transforms = doc.createElementNS(ds, "ds:Transforms");
-        ref.appendChild(transforms);
-
-        Element tr = doc.createElementNS(ds, "ds:Transform");
-        tr.setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#enveloped-signature");
-        transforms.appendChild(tr);
-
-        Element tr2 = doc.createElementNS(ds, "ds:Transform");
-        tr2.setAttribute("Algorithm", "http://www.w3.org/TR/2001/REC-xml-c14n-20010315");
-        transforms.appendChild(tr2);
-
-        Element dm = doc.createElementNS(ds, "ds:DigestMethod");
-        dm.setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#sha1");
-        ref.appendChild(dm);
-
-        Element dv = doc.createElementNS(ds, "ds:DigestValue");
-        dv.setTextContent("SGVsbG9Xb3JsZA==");
-        ref.appendChild(dv);
-
-        Element sv = doc.createElementNS(ds, "ds:SignatureValue");
-        sv.setTextContent("SGVsbG9Xb3JsZA==");
-        sig.appendChild(sv);
-
-        Element ki = doc.createElementNS(ds, "ds:KeyInfo");
-        Element x509 = doc.createElementNS(ds, "ds:X509Data");
-        Element cert = doc.createElementNS(ds, "ds:X509Certificate");
-        cert.setTextContent("SGVsbG9Xb3JsZA==");
-        x509.appendChild(cert);
-        ki.appendChild(x509);
-        sig.appendChild(ki);
-    }
-
     public static void main(String[] args) {
         try {
             gerarXmlCancelamento(

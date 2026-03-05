@@ -6,6 +6,13 @@
 
 # Logs
 *.log
+logs/
+
+# Arquivos de configuração (contém senhas)
+integrador_config.properties
+
+# Arquivos gerados pelo Maven
+dependency-reduced-pom.xml
 
 # IDEs
 *.swp
@@ -49,4 +56,4 @@ build/
 # IntelliJ/VSCode (caso abra o projeto em outras IDEs)
 .idea/
 *.iml
-.vscode/
+# .vscode/

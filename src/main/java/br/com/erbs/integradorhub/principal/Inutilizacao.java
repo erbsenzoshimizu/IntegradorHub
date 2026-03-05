@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,7 +21,7 @@ public class Inutilizacao {
     public static void gerarXmlInutilizacao(String tpAmb, String uf, String cnpj, Integer serie, Integer numero, String justificativa, String arquivoSaida)
             throws Exception {
 
-        String cUf = obterCodigoUF(uf);
+        String cUf = getCodigoUF(uf);
         String ano = LocalDate.now().format(DateTimeFormatter.ofPattern("yy"));
         String serieFormatada = String.format("%03d", serie);
         String numeroFormatado = String.format("%09d", numero);
@@ -80,122 +79,65 @@ public class Inutilizacao {
         parent.appendChild(element);
     }
 
-    public static String obterCodigoUF(String sigla) {
-        if (sigla == null) {
-            return null;
-        }
-
-        switch (sigla.trim().toUpperCase()) {
-            case "RO":
-                return "11";
+    private static String getCodigoUF(String uf) {
+        switch (uf) {
             case "AC":
                 return "12";
-            case "AM":
-                return "13";
-            case "RR":
-                return "14";
-            case "PA":
-                return "15";
-            case "AP":
-                return "16";
-            case "TO":
-                return "17";
-            case "MA":
-                return "21";
-            case "PI":
-                return "22";
-            case "CE":
-                return "23";
-            case "RN":
-                return "24";
-            case "PB":
-                return "25";
-            case "PE":
-                return "26";
             case "AL":
                 return "27";
-            case "SE":
-                return "28";
+            case "AP":
+                return "16";
+            case "AM":
+                return "13";
             case "BA":
                 return "29";
-            case "MG":
-                return "31";
-            case "ES":
-                return "32";
-            case "RJ":
-                return "33";
-            case "SP":
-                return "35";
-            case "PR":
-                return "41";
-            case "SC":
-                return "42";
-            case "RS":
-                return "43";
-            case "MS":
-                return "50";
-            case "MT":
-                return "51";
-            case "GO":
-                return "52";
+            case "CE":
+                return "23";
             case "DF":
                 return "53";
+            case "ES":
+                return "32";
+            case "GO":
+                return "52";
+            case "MA":
+                return "21";
+            case "MT":
+                return "51";
+            case "MS":
+                return "50";
+            case "MG":
+                return "31";
+            case "PA":
+                return "15";
+            case "PB":
+                return "25";
+            case "PR":
+                return "41";
+            case "PE":
+                return "26";
+            case "PI":
+                return "22";
+            case "RJ":
+                return "33";
+            case "RN":
+                return "24";
+            case "RS":
+                return "43";
+            case "RO":
+                return "11";
+            case "RR":
+                return "14";
+            case "SC":
+                return "42";
+            case "SP":
+                return "35";
+            case "SE":
+                return "28";
+            case "TO":
+                return "17";
             default:
                 return null; // UF inválida
         }
-    }
-
-    private static void adicionarSignatureFake(Document doc, Element evento, String idEvento) {
-        final String ds = "http://www.w3.org/2000/09/xmldsig#";
-        Element sig = doc.createElementNS(ds, "ds:Signature");
-        sig.setAttribute("xmlns:ds", ds);
-        evento.appendChild(sig);
-
-        Element si = doc.createElementNS(ds, "ds:SignedInfo");
-        sig.appendChild(si);
-
-        Element cm = doc.createElementNS(ds, "ds:CanonicalizationMethod");
-        cm.setAttribute("Algorithm", "http://www.w3.org/TR/2001/REC-xml-c14n-20010315");
-        si.appendChild(cm);
-
-        Element sm = doc.createElementNS(ds, "ds:SignatureMethod");
-        sm.setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1");
-        si.appendChild(sm);
-
-        Element ref = doc.createElementNS(ds, "ds:Reference");
-        ref.setAttribute("URI", "#" + idEvento);
-        si.appendChild(ref);
-
-        Element transforms = doc.createElementNS(ds, "ds:Transforms");
-        ref.appendChild(transforms);
-
-        Element tr = doc.createElementNS(ds, "ds:Transform");
-        tr.setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#enveloped-signature");
-        transforms.appendChild(tr);
-
-        Element tr2 = doc.createElementNS(ds, "ds:Transform");
-        tr2.setAttribute("Algorithm", "http://www.w3.org/TR/2001/REC-xml-c14n-20010315");
-        transforms.appendChild(tr2);
-
-        Element dm = doc.createElementNS(ds, "ds:DigestMethod");
-        dm.setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#sha1");
-        ref.appendChild(dm);
-
-        Element dv = doc.createElementNS(ds, "ds:DigestValue");
-        dv.setTextContent("SGVsbG9Xb3JsZA==");
-        ref.appendChild(dv);
-
-        Element sv = doc.createElementNS(ds, "ds:SignatureValue");
-        sv.setTextContent("SGVsbG9Xb3JsZA==");
-        sig.appendChild(sv);
-
-        Element ki = doc.createElementNS(ds, "ds:KeyInfo");
-        Element x509 = doc.createElementNS(ds, "ds:X509Data");
-        Element cert = doc.createElementNS(ds, "ds:X509Certificate");
-        cert.setTextContent("SGVsbG9Xb3JsZA==");
-        x509.appendChild(cert);
-        ki.appendChild(x509);
-        sig.appendChild(ki);
     }
 
     public static void main(String[] args) {
