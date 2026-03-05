@@ -41,7 +41,7 @@ public class NotaFiscalSaidaDAO {
             pst.executeUpdate();
             logger.info("Dados da autorização gravados com sucesso.");
         } catch (SQLException ex) {
-            logger.error("Erro ao gravar ocorrência: " + ex.getMessage());
+            logger.error("Erro ao gravar ocorrência: " + ex.getMessage(), ex);
         }
     }
     

@@ -117,15 +117,15 @@ public class ProcessadorXml {
             logger.info("Arquivo gravado em: " + arquivoSaida);
 
         } catch (ParserConfigurationException ex) {
-            logger.error("Erro na configuração do parser XML: " + ex.getMessage());
+            logger.error("Erro na configuração do parser XML: " + ex.getMessage(), ex);
         } catch (SAXException ex) {
-            logger.error("Erro no formato do XML: " + ex.getMessage());
+            logger.error("Erro no formato do XML: " + ex.getMessage(), ex);
         } catch (IOException ex) {
-            logger.error("Erro ao acessar o arquivo: " + ex.getMessage());
+            logger.error("Erro ao acessar o arquivo: " + ex.getMessage(), ex);
         } catch (TransformerConfigurationException ex) {
-            logger.error("Erro ao configurar o transformador: " + ex.getMessage());
+            logger.error("Erro ao configurar o transformador: " + ex.getMessage(), ex);
         } catch (TransformerException ex) {
-            logger.error("Erro durante a transformação: " + ex.getMessage());
+            logger.error("Erro durante a transformação: " + ex.getMessage(), ex);
         }
     }
 

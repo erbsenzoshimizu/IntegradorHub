@@ -32,7 +32,7 @@ public final class Principal extends javax.swing.JFrame {
     private RandomAccessFile logReader;
     private long logFilePointer = 0;
     private Timer tailTimer;
-    private static final String LOG_DIR = System.getProperty("user.dir") + "/logs/";
+    private static final String LOG_DIR = System.getProperty("log.dir", System.getProperty("user.dir") + "/logs/");
     private String logFileNameAtual = "";
 
     // caminhos de diretório

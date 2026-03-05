@@ -2,9 +2,7 @@ package br.com.erbs.integradorhub.webservice;
 
 import br.com.erbs.integradorhub.dao.NotaFiscalSaidaDAO;
 import br.com.erbs.integradorhub.util.ConfigLoader;
-import java.io.ByteArrayOutputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.namespace.QName;
@@ -29,8 +27,8 @@ public class WebServiceSDE {
 
     private static final String BASE_URL = ConfigLoader.get("urlSdeWS");
     private static final String NAMESPACE = "http://www.senior.com.br/nfe";
-    private static final String USER = "edocs";
-    private static final String PASSWORD = "r3m0t0-";
+    private static final String USER = ConfigLoader.get("wsUser");
+    private static final String PASSWORD = ConfigLoader.get("wsPassword");
 
     private Dispatch<SOAPMessage> createDispatch(String endpoint) throws Exception {
         URL url = new URL(BASE_URL + "?wsdl");
@@ -82,7 +80,7 @@ public class WebServiceSDE {
         return soapMessage;
     }
 
-    public Boolean autorizarDocumento(String xml, String cnpjFilial) {
+    public boolean autorizarDocumento(String xml, String cnpjFilial) {
         try {
             Dispatch<SOAPMessage> dispatch = createDispatch("AutorizarDocumento");
 
@@ -100,9 +98,10 @@ public class WebServiceSDE {
 
             SOAPMessage request = createSoapMessage("AutorizarDocumento", params);
 
-            ByteArrayOutputStream otp = new ByteArrayOutputStream();
-            request.writeTo(otp);
-            System.out.println(new String(otp.toByteArray(), StandardCharsets.UTF_8));
+            // Removido dump de credenciais/XML por segurança - habilitar apenas em debug se necessário
+            // ByteArrayOutputStream otp = new ByteArrayOutputStream();
+            // request.writeTo(otp);
+            // System.out.println(new String(otp.toByteArray(), StandardCharsets.UTF_8));
 
             SOAPMessage response = dispatch.invoke(request);
 
@@ -141,7 +140,6 @@ public class WebServiceSDE {
                 notaFiscalSaidaDAO.autorizarNfce(resposta);
 
                 logger.info("Documento autorizado com sucesso.");
-
                 return true;
             } else if ("false".equals(resposta.get("Sucesso"))) {
                 logger.error("Erro ao autorizar documento: " + resposta.get("Mensagem"));
@@ -152,8 +150,8 @@ public class WebServiceSDE {
             }
 
         } catch (Exception e) {
-            logger.error("Erro ao acessar o WebService do eDocs: " + e.getMessage());
-            return null;
+            logger.error("Erro ao acessar o WebService do eDocs: " + e.getMessage(), e);
+            return false;
         }
     }
 }

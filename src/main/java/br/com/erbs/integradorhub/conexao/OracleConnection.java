@@ -14,9 +14,7 @@ public class OracleConnection {
 
     private static final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
 
-    public static Connection openConnection() {
-        Connection dbconn;
-
+    public static Connection openConnection() throws SQLException {
         try {
             Class.forName(ORACLE_DRIVER);
 
@@ -28,17 +26,12 @@ public class OracleConnection {
             dbCredentials.put("user", user);
             dbCredentials.put("password", password);
 
-            dbconn = DriverManager.getConnection(url, dbCredentials);
+            return DriverManager.getConnection(url, dbCredentials);
 
         } catch (ClassNotFoundException e) {
-            logger.error("Driver JDBC não encontrado: " + e.getMessage());
-            return null;
-        } catch (SQLException e) {
-            logger.error("Erro ao conectar ao Banco de Dados: " + e.getMessage());
-            return null;
+            logger.error("Driver JDBC não encontrado: " + e.getMessage(), e);
+            throw new SQLException("Driver JDBC não encontrado", e);
         }
-
-        return dbconn;
     }
 
 }
